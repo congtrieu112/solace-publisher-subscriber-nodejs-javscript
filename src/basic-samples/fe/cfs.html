@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+  <!-- Load Solace Web Messaging API for JavaScript -->
+  <script src="assets/solclient-debug.js"></script>
+
+  <!-- Load the PublishSubscribe Topic Subscriber tutorial -->
+  <script src="assets/TopicSubscriber.js"></script>
+  <title>Hello , soket IO</title>
+  <script>
+    var subscriber = null;
+    window.onload = function () {
+      // Initialize factory with the most recent API defaults
+      var factoryProps = new solace.SolclientFactoryProperties();
+      factoryProps.profile = solace.SolclientFactoryProfiles.version10;
+      solace.SolclientFactory.init(factoryProps);
+
+      // enable logging to JavaScript console at WARN level
+      // NOTICE: works only with "solclientjs-debug.js"
+      solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
+      var topic = document.getElementById('top-pic-subscribe').value;
+      // create the subscriber, specifying name of the subscription topic
+      subscriber = new TopicSubscriber(topic);
+      // assign buttons to the subscriber functions
+      document.getElementById("connect").addEventListener("click", subscriber.connect);
+      document.getElementById("disconnect").addEventListener("click", subscriber.disconnect);
+      document.getElementById("subscribe").addEventListener("click", function () {
+        // console.log(234234);
+
+        subscriber.addsubscribe(document.getElementById('top-pic-subscribe').value);
+      });//subscriber.addsubscribe(topic));
+      document.getElementById("unsubscribe").addEventListener("click", subscriber.unsubscribe);
+      document.getElementById('connect').click();
+      setTimeout(function () {
+        // document.getElementById('subscribe').click();
+        var subscribeTopic = ['list-new-log', 'list-new-cfs', 'update-cfs'];
+        for (let i of subscribeTopic) {
+          subscriber.addsubscribe(i);
+        }
+      }, 3000)
+
+    };
+    function iframeloaded() {
+      if (subscriber) {
+        subscriber.connectToSolace();
+      }
+    };
+
+  </script>
+</head>
+
+<body>
+
+
+  <div class="loginForm">
+    <div class="row">
+      <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+        <div class="card card-signin my-5">
+          <div class="card-body">
+            <h5 class="card-title text-center">Sign In</h5>
+            <form class="form-signin" method="post" action="/login" id="loginCheck">
+              <div class="form-label-group">
+                <input type="email" name="inputEmail" id="inputEmail" class="form-control" placeholder="Email address"
+                  required autofocus>
+                <label for="inputEmail">Email address</label>
+              </div>
+
+              <div class="form-label-group">
+                <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                <label for="inputPassword">Password</label>
+              </div>
+
+              <div class="custom-control custom-checkbox mb-3">
+                <input type="checkbox" class="custom-control-input" id="customCheck1">
+                <label class="custom-control-label" for="customCheck1">Remember password</label>
+              </div>
+              <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Sign in</button>
+              <hr class="my-4">
+              <button class="btn btn-lg btn-google btn-block text-uppercase" type="submit"><i
+                  class="fab fa-google mr-2"></i> Sign in with Google</button>
+              <button class="btn btn-lg btn-facebook btn-block text-uppercase" type="submit"><i
+                  class="fab fa-facebook-f mr-2"></i> Sign in with Facebook</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="views-cfs">
+    <!-- used to prompt selection of client certificate -->
+    <iframe id="iframe" src="" onload="iframeloaded()" hidden></iframe>
+    <div class="container">
+      <form class="pure-form pure-form-aligned">
+        <fieldset>
+
+          <div class="form-group">
+            <label for="hosturl">Solace router host url</label>
+            <input id="hosturl" type="text" placeholder="<protocol://host[:port]>" class="form-control"
+              value="ws://localhost">
+          </div>
+
+          <div class="form-group">
+            <label for="message-vpn">Message-vpn</label>
+            <input id="message-vpn" type="text" placeholder="Message VPN" value="default" class="form-control"
+              value="default">
+          </div>
+
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input id="username" type="text" placeholder="Username" class="form-control" value="default">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="Password" class="form-control" value="secret">
+          </div>
+
+        </fieldset>
+        <p>
+          <button type="button" class="btn btn-lg btn-primary" id="connect">Connect</button>
+          <button type="button" class="btn btn-lg btn-warning" id="disconnect">Disconnect</button>
+        </p>
+        <p>
+          <div class="form-group">
+            <label for="top-pic-subscribe">Name pic subscribe</label>
+            <input id="top-pic-subscribe" type="text" placeholder="top-pic-subscribe" class="form-control"
+              value="list-new-log">
+          </div>
+          <button type="button" class="btn btn-lg btn-primary" id="subscribe">Subscribe</button>
+          <button type="button" class="btn btn-lg btn-warning" id="unsubscribe">Unsubscribe</button>
+        </p>
+
+
+        <textarea id="log" rows="10" cols="20" autofocus style="width: 100%"></textarea>
+
+      </form>
+      <h1>Call Taker (F10 let Insert)</h1>
+      <button type="button" id="logOut" class="btn btn-dark">Logout</button>
+      <form action="" method="post" id="submitSend">
+
+        <div class="form-group">
+          <label for="textName">Name</label>
+          <input type="text" name="textName" id="textName" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+          <label for="textAddress">Address</label>
+          <input type="text" name="" id="textAddress" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+          <label for="textDescription">Description</label>
+          <input type="text" name="textDescription" id="textDescription" class="form-control" placeholder="">
+        </div>
+
+      </form>
+      <h1>CFS Logs</h1>
+      <div class="table-wrapper-scroll-y my-custom-scrollbar">
+        <table class="table" id="cfsLogs">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Date</th>
+              <th scope="col">Action</th>
+              <th scope="col">Email</th>
+              <th scope="col">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+      <hr>
+      <h1>CFS Views</h1>
+      <div class="table-wrapper-scroll-y my-custom-scrollbar">
+        <table class="table table-hover" id="cfsViews">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Address</th>
+              <th scope="col">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+  </div>
+  <style>
+    .my-custom-scrollbar {
+      position: relative;
+      height: 300px;
+      overflow: auto;
+    }
+
+    .table-wrapper-scroll-y {
+      display: block;
+    }
+
+    #cfsViews tr {
+      cursor: pointer;
+    }
+  </style>
+
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+  <script>
+    // localStorage.setItem('testObject', testObject);
+    // retrievedObject = localStorage.getItem('testObject');
+    // localStorage.removeItem(key);
+
+
+    var login = localStorage.getItem('login');
+    if (login) {
+      $(".views-cfs").fadeIn();
+      $(".loginForm").fadeOut();
+    } else {
+      $(".views-cfs").fadeOut();
+      $(".loginForm").fadeIn();
+    }
+
+    var ipConnect = 'localhost';//'45.63.0.193';
+    var port = 3000;
+    var email = localStorage.getItem('login') ? localStorage.getItem('login').replace("@", "acong") : '';
+    console.log(email)
+    var addressClass = null, nameClass = null, descriptionClass = null;
+
+    $(document).ready((e) => {
+      $("#logOut").click(function (e) {
+        localStorage.removeItem('login');
+        location.reload();
+        return false;
+      })
+      $("#loginCheck").submit(function (e) {
+        e.preventDefault();
+        var email = $("#inputEmail").val();
+        localStorage.setItem('login', email);
+        location.reload();
+        return false;
+      })
+      $("#submitSend").submit((e) => {
+        var message = {
+          from: 'myles',
+          to: 'congeries'
+        }
+        // socket.emit('message', message);
+        return false;
+      })
+      $(window).on('keydown', event => {
+        if (event.keyCode == 37) {
+          alert('Left was pressed');
+        }
+        else if (event.keyCode == 39) {
+          alert('Right was pressed');
+        }
+        else if (event.keyCode === 121) {
+          createCfs(localStorage.getItem('login'));
+          $('#submitSend')[0].reset();
+
+          $('#textAddress').removeClass(addressClass);
+          $('#textName').removeClass(nameClass);
+          $('#textDescription').removeClass(descriptionClass);
+
+        }
+      })
+      $('input').each(function () {
+        const $this = $(this);
+        $this.blur(function () {
+          const nameKey = $(this).attr('id');
+          var address = $('#textAddress').val(), name = $('#textName').val(), description = $('#textDescription').val();
+          const id = $("#submitSend").attr('data-id');
+          if (!id) return false;
+          switch (nameKey) {
+            case 'textName':
+              name = $(this).val();
+              break;
+            case 'textAddress':
+              address = $(this).val();
+              break;
+            case 'textDescription':
+              description = $(this).val();
+              break;
+          }
+          const m = {
+            _id: id,
+            address: address,
+            name: name,
+            description: description
+          }
+          update('tutorial/topic', m)
+          // socket.emit('update-cfs', m)
+        })
+      })
+      // socket.on("update-cfs", response => {
+      //   $('#textAddress').val(response.address);
+      //   $('#textName').val(response.name);
+      //   $('#textDescription').val(response.description);
+
+      // });
+      // socket.on("list-new-cfs", data => {
+      //   var html = null;
+      //   if (Array.isArray(data)) {
+      //     for (let item of data) {
+      //       html += `<tr data-id="${item._id}">
+      //                 <th scope="row">${item._id}</th>
+      //                  <td>${item.name}</td>
+      //                 <td>${item.address}</td >
+      //                 <td>${item.description}</td>
+      //               </tr>`;
+      //     }
+      //     $("#cfsViews").find("tbody").html(html);
+      //   }
+      // });
+      // socket.on("list-new-log", data => {
+      //   var html = null;
+      //   if (Array.isArray(data)) {
+      //     for (let item of data) {
+      //       html += `<tr data-id="${item._id}">
+      //                 <th scope="row">${item._id}</th>
+      //                 <td>${item.date}</td >
+      //                 <td>${item.action}</td>
+      //                 <td>${item.email}</td>
+      //                 <td>${item.description}</td>
+      //               </tr>`;
+      //     }
+      //     $("#cfsLogs").find("tbody").html(html);
+      //   }
+      // });
+      $("#cfsViews").find("tbody").on("click", "tr", function () {
+        const $this = $(this);
+        const $id = $this.data('id');
+        if ($id) {
+          getInfoCfsById($id);
+        }
+
+      })
+
+
+      function getInfoCfsById(id) {
+        $.ajax({
+          url: `http://${ipConnect}:${port}/load-cfs-view-id`,
+          type: "post",
+          data: {id: id},
+          success: function (response) {
+            // you will get response from your php page (what you echo or print)                 
+            addressClass = `address-cfs-${response._id}`;
+            nameClass = `name-cfs-${response._id}`;
+            descriptionClass = `description-cfs-${response._id}`;
+            $('#textAddress').addClass(addressClass).val(response.address);
+            $('#textName').addClass(nameClass).val(response.name);
+            $('#textDescription').addClass(nameClass).val(response.description);
+            $("#submitSend").attr('data-id', response._id);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
+          }
+
+
+        });
+      }
+
+      function createCfs(email) {
+        $.ajax({
+          url: `http://${ipConnect}:${port}/create-cfs`,
+          type: "post",
+          data: {email: email},
+          success: function (response) {
+            // socket.emit("list-new-cfs", response.listcfsviews);
+            // socket.emit("list-new-log", response.listcfslog);
+            console.log(response.listcfslog)
+            addressClass = `address-cfs-${response._id}`;
+            nameClass = `name-cfs-${response._id}`;
+            descriptionClass = `description-cfs-${response._id}`;
+            $('#textAddress').addClass(addressClass).val(response.address);
+            $('#textName').addClass(nameClass).val(response.name);
+            $('#textDescription').addClass(nameClass).val(response.description);
+            $("#submitSend").attr('data-id', response._id);
+
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
+          }
+
+
+        });
+      }
+
+      function loadListCfsView() {
+        $.ajax({
+          url: `http://${ipConnect}:${port}/load-cfs-view`,
+          type: "get",
+          success: function (data) {
+            // you will get response from your php page (what you echo or print)                 
+
+            var html = null;
+            if (Array.isArray(data)) {
+              for (let item of data) {
+                html += `<tr data-id="${item._id}">
+                    <th scope="row">${item._id}</th>
+                    <td>${item.name}</td>
+                    <td>${item.address}</td >
+                    <td>${item.description}</td>
+                   </tr>`;
+              }
+              $("#cfsViews").find("tbody").html(html);
+            }
+
+
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
+          }
+
+
+        });
+      }
+      function loadListCfsLog() {
+        $.ajax({
+          url: `http://${ipConnect}:${port}/load-cfs-log`,
+          type: "get",
+          success: function (data) {
+            // you will get response from your php page (what you echo or print)                 
+            console.log(data)
+            var html = null;
+            if (Array.isArray(data)) {
+              for (let item of data) {
+                html += `<tr data-id="${item._id}">
+                      <th scope="row">${item._id}</th>
+                      <td>${item.date}</td >
+                      <td>${item.action}</td>
+                      <td>${item.email}</td>
+                      <td>${item.description}</td>
+                    </tr>`;
+              }
+              $("#cfsLogs").find("tbody").html(html);
+            }
+
+
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
+          }
+
+
+        });
+      }
+      function update(topic, msg) {
+        msg.email = localStorage.getItem('login');
+        $.ajax({
+          url: `http://${ipConnect}:${port}/update-cfs`,
+          type: "post",
+          data: msg,
+          success: function (response) {
+            // socket.emit("list-new-cfs", response.listcfsviews);
+            // socket.emit("list-new-log", response.listcfslog);
+            console.log(response)
+            // addressClass = `address-cfs-${response._id}`;
+            // nameClass = `name-cfs-${response._id}`;
+            // descriptionClass = `description-cfs-${response._id}`;
+            // $('#textAddress').addClass(addressClass).val(response.address);
+            // $('#textName').addClass(nameClass).val(response.name);
+            // $('#textDescription').addClass(nameClass).val(response.description);
+            // $("#submitSend").attr('data-id', response._id);
+
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, errorThrown);
+          }
+
+
+        });
+      }
+      loadListCfsView();
+      loadListCfsLog();
+
+
+
+
+
+
+
+    });
+
+
+
+
+  </script>
+</body>
+
+</html>
