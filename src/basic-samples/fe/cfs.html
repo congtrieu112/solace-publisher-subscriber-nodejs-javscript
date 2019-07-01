@@ -17,8 +17,11 @@
   <title>Hello , soket IO</title>
   <script>
     var subscriber = null;
+    const HOST = window.location.hostname;
+    var subscribeTopic = ['list-new-log', 'list-new-cfs', 'update-cfs'];
     window.onload = function () {
       // Initialize factory with the most recent API defaults
+      document.getElementById("hosturl").value = 'wss://mrrwtxvkmln5x.messaging.solace.cloud:20068';// `ws://${HOST}`;
       var factoryProps = new solace.SolclientFactoryProperties();
       factoryProps.profile = solace.SolclientFactoryProfiles.version10;
       solace.SolclientFactory.init(factoryProps);
@@ -35,17 +38,33 @@
       document.getElementById("subscribe").addEventListener("click", function () {
         // console.log(234234);
 
-        subscriber.addsubscribe(document.getElementById('top-pic-subscribe').value);
-      });//subscriber.addsubscribe(topic));
-      document.getElementById("unsubscribe").addEventListener("click", subscriber.unsubscribe);
-      document.getElementById('connect').click();
-      setTimeout(function () {
-        // document.getElementById('subscribe').click();
-        var subscribeTopic = ['list-new-log', 'list-new-cfs', 'update-cfs'];
+        var nTopic = document.getElementById('top-pic-subscribe').value;
+        if (nTopic && subscribeTopic.indexOf(nTopic) <= -1) {
+
+          subscribeTopic.push(nTopic)
+        }
+
         for (let i of subscribeTopic) {
           subscriber.addsubscribe(i);
         }
-      }, 3000)
+      });//subscriber.addsubscribe(topic));
+      document.getElementById("unsubscribe").addEventListener("click",function(){
+        var nTopic = document.getElementById('top-pic-subscribe').value;
+        if (nTopic && subscribeTopic.indexOf(nTopic) <= -1) {
+          subscribeTopic.push(nTopic)
+        }
+        for (let i of subscribeTopic) {
+          subscriber.unsubscribecs(i);
+        }
+      } );
+      document.getElementById('connect').click();
+      setTimeout(function () {
+        document.getElementById('subscribe').click();
+   
+      }, 2000)
+      // console.log(window.location.hostname)
+      
+      
 
     };
     function iframeloaded() {
@@ -55,6 +74,7 @@
     };
 
   </script>
+  
 </head>
 
 <body>
@@ -105,23 +125,23 @@
           <div class="form-group">
             <label for="hosturl">Solace router host url</label>
             <input id="hosturl" type="text" placeholder="<protocol://host[:port]>" class="form-control"
-              value="ws://localhost">
+              value="wss://mrrwtxvkmln5x.messaging.solace.cloud:20068">
           </div>
 
           <div class="form-group">
             <label for="message-vpn">Message-vpn</label>
-            <input id="message-vpn" type="text" placeholder="Message VPN" value="default" class="form-control"
-              value="default">
+            <input id="message-vpn" type="text" placeholder="Message VPN"  class="form-control"
+              value="msgvpn-rwtxvkmog11">
           </div>
 
           <div class="form-group">
             <label for="username">Username</label>
-            <input id="username" type="text" placeholder="Username" class="form-control" value="default">
+            <input id="username" type="text" placeholder="Username" class="form-control" value="solace-cloud-client">
           </div>
 
           <div class="form-group">
             <label for="password">Password</label>
-            <input id="password" type="password" placeholder="Password" class="form-control" value="secret">
+            <input id="password" type="password" placeholder="Password" class="form-control" value="4pjrvm6adfpok80kfi2cplkkak">
           </div>
 
         </fieldset>
@@ -244,8 +264,8 @@
       $(".loginForm").fadeIn();
     }
 
-    var ipConnect = 'localhost';//'45.63.0.193';
-    var port = 3000;
+    var ipConnect = HOST;//'localhost';//'45.63.0.193';
+    var port = 4000;
     var email = localStorage.getItem('login') ? localStorage.getItem('login').replace("@", "acong") : '';
     console.log(email)
     var addressClass = null, nameClass = null, descriptionClass = null;

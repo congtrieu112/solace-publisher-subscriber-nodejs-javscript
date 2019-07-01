@@ -143,7 +143,7 @@ var TopicSubscriber = function(topicName) {
           );
           subscriber.log("=== Ready to receive messages. ===");
         } else {
-          subscriber.subscribed = false;
+          // subscriber.subscribed = false;
           subscriber.log(
             "Successfully unsubscribed from topic: " +
               sessionEvent.correlationKey
@@ -245,8 +245,9 @@ var TopicSubscriber = function(topicName) {
           topPic, // use topic name as correlation key
           10000 // 10 seconds timeout for this operation
         );
+        subscriber.check = true;
       } catch (error) {
-        subscriber.log("trieu" + error.toString());
+        subscriber.log("log" + error.toString());
       }
     }, 3000);
   };
@@ -283,6 +284,21 @@ var TopicSubscriber = function(topicName) {
       );
     }
   };
+
+  subscriber.unsubscribecs = function (topicName) {
+    try {
+      subscriber.session.unsubscribe(
+        solace.SolclientFactory.createTopicDestination(topicName),
+        true, // generate confirmation when subscription is removed successfully
+        topicName, // use topic name as correlation key
+        10000 // 10 seconds timeout for this operation
+      );
+      console.log('topicName', topicName)
+      subscriber.check =false
+    } catch (error) {
+      subscriber.log(error.toString());
+    }
+  }
 
   // Unsubscribes from topic on Solace message router
   subscriber.unsubscribe = function() {

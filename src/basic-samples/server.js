@@ -22,9 +22,11 @@ publisher.connect(process.argv);
 // publish message to Solace message router
 // publisher.run(process.argv);
 
-const URL_DB = "mongodb://localhost:27017";
+const HOST = "45.63.0.193";//"localhost";
+const URL_DB = `mongodb://${HOST}:27017`;
 const NAME_DB = "cfs";
 var app = express();
+
 app.use(bodyParser.json()); // to support JSON-encoded bodies
 app.use(
   bodyParser.urlencoded({
@@ -32,6 +34,7 @@ app.use(
     extended: true
   })
 );
+
 app.use("/assets", express.static("assets"));
 app.all("/*", function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -42,6 +45,7 @@ app.all("/*", function(req, res, next) {
 app.get("/", function(req, res) {
   res.sendFile(__dirname + "/fe/cfs.html");
 });
+
 app.get("/load-cfs-view", (req, res) => {
   MongoClient.connect(URL_DB, { useNewUrlParser: true }, function(err, client) {
     assert.equal(null, err);
@@ -109,7 +113,7 @@ app.post("/update-cfs", (rep, response) => {
         result
       ) {
         assert.equal(err, null);
-        collection.find({}).toArray(function(err, result) {
+        collection.find({}).sort({ _id: -1 }).toArray(function(err, result) {
           assert.equal(err, null);
           autoIncrement.getNextSequence(db, "logid", (err, autoIndex) => {
             const log = {
@@ -198,8 +202,7 @@ app.post("/create-cfs", (rep, response) => {
     });
   });
 });
-
-var server = app.listen(3000, function() {
+var server = app.listen(4000, function() {
   var host = server.address().address;
   var port = server.address().port;
   console.log(
@@ -209,136 +212,3 @@ var server = app.listen(3000, function() {
   );
 });
 
-// app.post("/create-cfs", (rep, response) => {
-//   const email = rep.body.email;
-//   MongoClient.connect(URL_DB, { useNewUrlParser: true }, function(err, client) {
-//     assert.equal(null, err);
-//     const db = client.db(NAME_DB);
-//     autoIncrement.getNextSequence(db, "cfsid", (err, autoIndex) => {
-//       const dataInsert = {
-//         _id: autoIndex,
-//         address: "",
-//         name: "",
-//         description: ""
-//       };
-//       const collection = db.collection("cfs_lists");
-//       collection.insert(dataInsert, (err, res) => {
-//         assert.equal(null, err);
-//         collection.find({}).toArray(function(err, result) {
-//           assert.equal(err, null);
-//           autoIncrement.getNextSequence(db, "logid", (err, autoIndex) => {
-//             const log = {
-//               _id: autoIndex,
-//               date: moment().format(),
-//               action: "insert",
-//               email: email,
-//               description: "insert f10"
-//             };
-//             const collectionLog = db.collection("logs");
-//             collectionLog.insert(log, (err, res) => {
-//               assert.equal(null, err);
-//               collectionLog.find({}).toArray(function(err, resultlog) {
-//                 assert.equal(err, null);
-//                 dataInsert.listcfslog = resultlog;
-//                 dataInsert.listcfsviews = result;
-//                 response.json(dataInsert);
-//                 client.close();
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   });
-// });
-// app.get("/load-cfs-view", (req, res) => {
-//   MongoClient.connect(URL_DB, { useNewUrlParser: true }, function(err, client) {
-//     assert.equal(null, err);
-//     const db = client.db(NAME_DB);
-//     const collection = db.collection("cfs_lists");
-//     collection.find({}).toArray(function(err, result) {
-//       assert.equal(err, null);
-//       client.close();
-//       res.json(result);
-//     });
-//   });
-// });
-// app.get("/load-cfs-log", (req, res) => {
-//   MongoClient.connect(URL_DB, { useNewUrlParser: true }, function(err, client) {
-//     assert.equal(null, err);
-//     const db = client.db(NAME_DB);
-//     const collection = db.collection("logs");
-//     collection.find({}).toArray(function(err, result) {
-//       assert.equal(err, null);
-//       client.close();
-//       res.json(result);
-//     });
-//   });
-// });
-
-// io.on("connection", function(socket) {
-//   socket.on("chat message", function(msg) {
-//     io.emit("chat message", msg);
-//   });
-//   socket.on("list-new-cfs", function(msg) {
-//     io.emit("list-new-cfs", msg);
-//   });
-//   socket.on("list-new-log", function(msg) {
-//     io.emit("list-new-log", msg);
-//   });
-
-//   socket.on("update-cfs", m => {
-//     // m = JSON.stringify(m);
-//     const email = socket.request._query.email.replace("acong", "@");
-//     MongoClient.connect(URL_DB, { useNewUrlParser: true }, function(
-//       err,
-//       client
-//     ) {
-//       assert.equal(null, err);
-//       const db = client.db(NAME_DB);
-//       const collection = db.collection("cfs_lists");
-//       var query = { _id: parseInt(m._id) };
-//       collection.findOne(query, function(err, result) {
-//         assert.equal(err, null);
-//         Object.keys(m).forEach(function(key) {
-//           if (key === "_id") {
-//             result[key] = parseInt(m[key]);
-//           } else {
-//             result[key] = m[key];
-//           }
-//         });
-//         const update = result;
-//         collection.updateOne(
-//           { _id: parseInt(m._id) },
-//           { $set: update },
-//           function(err, result) {
-//             assert.equal(err, null);
-//             collection.find({}).toArray(function(err, result) {
-//               assert.equal(err, null);
-//               autoIncrement.getNextSequence(db, "logid", (err, autoIndex) => {
-//                 const log = {
-//                   _id: autoIndex,
-//                   date: moment().format(),
-//                   action: "insert",
-//                   email: email,
-//                   description: `update ` + JSON.stringify(update)
-//                 };
-//                 const collectionLog = db.collection("logs");
-//                 collectionLog.insert(log, (err, res) => {
-//                   assert.equal(null, err);
-//                   collectionLog.find({}).toArray(function(err, resultlog) {
-//                     assert.equal(err, null);
-//                     io.emit("list-new-log", resultlog);
-//                     client.close();
-//                   });
-//                 });
-//               });
-//               io.emit("list-new-cfs", result);
-//             });
-//             io.emit("update-cfs", update);
-//           }
-//         );
-//       });
-//     });
-//   });
-// });

@@ -156,6 +156,18 @@ var TopicSubscriber = function (solaceModule, topicName) {
             process.exit();
         }, 1000); // wait for 1 second to finish
     };
+    subscriber.unsubscribecs = function (topicName) {
+        try {
+            subscriber.session.unsubscribe(
+                solace.SolclientFactory.createTopicDestination(topicName),
+                true, // generate confirmation when subscription is removed successfully
+                topicName, // use topic name as correlation key
+                10000 // 10 seconds timeout for this operation
+            );
+        } catch (error) {
+            subscriber.log(error.toString());
+        }
+    }
 
     // Unsubscribes from topic on Solace message router
     subscriber.unsubscribe = function () {
