@@ -5,7 +5,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "express": "^4.17.1",
-        "moment": "^2.24.0",
+        "moment": "^2.29.4",
         "mongodb": "^3.2.7",
         "mongodb-autoincrement": "^1.0.1",
         "solclientjs": "^10.0.0"
