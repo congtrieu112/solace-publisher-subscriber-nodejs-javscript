@@ -4,7 +4,7 @@
     "description": "Simple sample applications to quickly demonstrate basic capabilities of the Solace node.js API",
     "license": "Apache-2.0",
     "dependencies": {
-        "express": "^4.17.1",
+        "express": "^4.18.2",
         "moment": "^2.24.0",
         "mongodb": "^3.2.7",
         "mongodb-autoincrement": "^1.0.1",
